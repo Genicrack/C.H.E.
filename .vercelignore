@@ -1,0 +1,5 @@
+.git
+.vercel
+*.log
+*.png
+iniciar-app.bat
