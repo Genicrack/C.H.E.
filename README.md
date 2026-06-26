@@ -9,11 +9,14 @@ Aplicacion web movil para probar camara, deteccion de gestos y voz en vivo.
 - Convierte esos gestos en frases en espanol con `speechSynthesis`.
 - Incluye 30 frases/senias con deteccion aproximada por camara.
 - Permite tocar frases rapidas para probar el altavoz.
+- Permite agregar y borrar senias desde la aplicacion.
 - Se puede instalar como PWA si se publica por HTTPS.
 
 ## 30 senias/frases incluidas
 
-Las 30 intentan detectarse desde la camara usando puntos de mano, cuerpo y movimiento. Las senias complejas son aproximadas: para precision profesional hace falta entrenar un modelo propio con videos reales de lengua de senias.
+Las 30 intentan detectarse desde la camara usando puntos de mano, cuerpo y movimiento. Las senias complejas son aproximadas: para precision profesional hace falta entrenar un modelo propio con videos reales de Lengua de Senias Argentina.
+
+La app ahora tiene un catalogo editable. Desde la pantalla principal se puede agregar una frase, escribir la descripcion validada de la senia LSA, elegir si usa un detector de camara disponible o si queda como boton, y borrar senias que no correspondan.
 
 | # | Frase hablada | Gesto/senia en espanol | Camara |
 | --- | --- | --- | --- |

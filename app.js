@@ -10,12 +10,18 @@ const cameraSelect = document.querySelector("#cameraSelect");
 const voiceSelect = document.querySelector("#voiceSelect");
 const phraseGrid = document.querySelector("#phraseGrid");
 const guideList = document.querySelector("#guideList");
+const signForm = document.querySelector("#signForm");
+const newPhrase = document.querySelector("#newPhrase");
+const newHow = document.querySelector("#newHow");
+const newGesture = document.querySelector("#newGesture");
 const spokenPhrase = document.querySelector("#spokenPhrase");
 const cameraStatus = document.querySelector("#cameraStatus");
 const modelStatus = document.querySelector("#modelStatus");
 const speechStatus = document.querySelector("#speechStatus");
 
-const signs = [
+const SIGNS_STORAGE_KEY = "vozsenias-signs-v1";
+
+const defaultSigns = [
   { phrase: "Hola", sign: "Palma abierta", gesture: "Open_Palm", how: "Pone la mano frente al pecho, palma mirando a la camara. Estira los 5 dedos y separalos un poco. Mantenela quieta 1 segundo." },
   { phrase: "Necesito ayuda", sign: "Puno cerrado", gesture: "Closed_Fist", how: "Pone la mano frente al pecho. Cerra todos los dedos fuerte, como haciendo un puno. Que no se vea ningun dedo estirado." },
   { phrase: "Si", sign: "Pulgar arriba", gesture: "Thumb_Up", how: "Cerra la mano en puno y deja solo el pulgar levantado hacia arriba. La una del pulgar tiene que mirar de costado." },
@@ -48,13 +54,7 @@ const signs = [
   { phrase: "No puedo hablar", sign: "Mano frente a la boca", gesture: "CANT_SPEAK", how: "Mano abierta tapando la boca. Mantenela quieta medio segundo." }
 ];
 
-const phraseMap = Object.fromEntries(
-  signs.filter((sign) => sign.gesture).map((sign) => [sign.gesture, sign.phrase])
-);
-
-const signLabelMap = Object.fromEntries(
-  signs.filter((sign) => sign.gesture).map((sign) => [sign.gesture, sign.sign])
-);
+let signs = loadSigns();
 
 let stream;
 let recognizer;
@@ -102,6 +102,27 @@ cameraSelect.addEventListener("change", () => {
     stop();
     start();
   }
+});
+
+signForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const phrase = newPhrase.value.trim();
+  const how = newHow.value.trim();
+  if (!phrase || !how) return;
+
+  signs.push({
+    id: crypto.randomUUID(),
+    phrase,
+    sign: phrase,
+    gesture: newGesture.value,
+    how
+  });
+
+  saveSigns();
+  renderPhraseButtons();
+  renderGestureGuide();
+  signForm.reset();
 });
 
 async function start() {
@@ -279,7 +300,7 @@ function handleGesture(result, poseResult) {
     return;
   }
 
-  const phrase = phraseMap[detectedGesture.categoryName];
+  const phrase = getPhraseForGesture(detectedGesture.categoryName);
   if (!phrase) return;
 
   if (stableGestureName === detectedGesture.categoryName) {
@@ -289,7 +310,7 @@ function handleGesture(result, poseResult) {
     stableGestureCount = 1;
   }
 
-  const signLabel = signLabelMap[detectedGesture.categoryName] ?? detectedGesture.categoryName;
+  const signLabel = getSignLabelForGesture(detectedGesture.categoryName) ?? detectedGesture.categoryName;
   modelStatus.textContent = `${signLabel} ${stableGestureCount}/5 ${Math.round(detectedGesture.score * 100)}%`;
 
   if (stableGestureCount < 5) return;
@@ -575,6 +596,39 @@ function showEnvironmentHint() {
   }
 }
 
+function loadSigns() {
+  try {
+    const storedRaw = localStorage.getItem(SIGNS_STORAGE_KEY);
+    if (storedRaw !== null) {
+      const stored = JSON.parse(storedRaw);
+      if (Array.isArray(stored)) return stored;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+
+  return defaultSigns.map((sign, index) => ({ id: `default-${index + 1}`, ...sign }));
+}
+
+function saveSigns() {
+  localStorage.setItem(SIGNS_STORAGE_KEY, JSON.stringify(signs));
+}
+
+function getPhraseForGesture(gestureName) {
+  return signs.find((sign) => sign.gesture === gestureName)?.phrase;
+}
+
+function getSignLabelForGesture(gestureName) {
+  return signs.find((sign) => sign.gesture === gestureName)?.sign;
+}
+
+function removeSign(signId) {
+  signs = signs.filter((sign) => sign.id !== signId);
+  saveSigns();
+  renderPhraseButtons();
+  renderGestureGuide();
+}
+
 function renderPhraseButtons() {
   phraseGrid.innerHTML = "";
 
@@ -597,7 +651,13 @@ function renderGestureGuide() {
   for (const sign of signs) {
     const item = document.createElement("article");
     item.className = "guide-item";
-    item.innerHTML = `<strong>${sign.sign}</strong><span class="guide-tag">${sign.gesture ? "Camara" : "Boton"}</span><span>${sign.how}</span>`;
+    item.innerHTML = `<strong>${sign.sign}</strong><span class="guide-tag">${sign.gesture ? "Camara" : "Boton"}</span><span>${sign.how}</span><button class="delete-sign" type="button" data-sign-id="${sign.id}">Borrar</button>`;
     guideList.append(item);
   }
 }
+
+guideList.addEventListener("click", (event) => {
+  const deleteButton = event.target.closest(".delete-sign");
+  if (!deleteButton) return;
+  removeSign(deleteButton.dataset.signId);
+});

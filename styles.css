@@ -229,6 +229,36 @@ select {
   gap: 10px;
 }
 
+.sign-editor {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #111720;
+}
+
+.sign-editor h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.sign-editor input,
+.sign-editor textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--text);
+  padding: 10px;
+}
+
+.sign-editor textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
 .phrase-button,
 .guide-item {
   min-height: 64px;
@@ -265,6 +295,17 @@ select {
   color: #86efac;
   font-weight: 800;
   padding: 3px 8px;
+}
+
+.delete-sign {
+  align-self: flex-start;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.12);
+  color: #fecaca;
+  cursor: pointer;
+  padding: 7px 10px;
+  font-weight: 800;
 }
 
 .guide-panel {

@@ -62,6 +62,26 @@
 
         <div class="phrase-grid" id="phraseGrid" aria-label="Frases rapidas"></div>
 
+        <form class="sign-editor" id="signForm">
+          <h2>Agregar senia LSA</h2>
+          <input id="newPhrase" type="text" placeholder="Frase que va a decir" required />
+          <textarea id="newHow" placeholder="Descripcion validada de la senia" required></textarea>
+          <select id="newGesture">
+            <option value="">Solo boton</option>
+            <option value="Open_Palm">Palma abierta</option>
+            <option value="Closed_Fist">Puno cerrado</option>
+            <option value="Thumb_Up">Pulgar arriba</option>
+            <option value="Thumb_Down">Pulgar abajo</option>
+            <option value="Victory">V de victoria</option>
+            <option value="Pointing_Up">Indice arriba</option>
+            <option value="THANKS">Mentor/cara hacia afuera</option>
+            <option value="PLEASE">Pecho circular</option>
+            <option value="CANT_SPEAK">Mano frente a boca</option>
+            <option value="WRITE">Gesto de escribir</option>
+          </select>
+          <button class="primary-button" type="submit">Agregar</button>
+        </form>
+
         <section class="guide-panel" aria-label="Guia de gestos">
           <h2>Guia de gestos</h2>
           <div class="guide-list" id="guideList"></div>
