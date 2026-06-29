@@ -329,7 +329,7 @@ function drawPoint(point, width, height, radius, color) {
 function handleGesture(result, poseResult) {
   const detectedGesture = getDetectedGesture(result, poseResult);
 
-  if (!detectedGesture || detectedGesture.score < 0.84) {
+  if (!detectedGesture || detectedGesture.score < 0.62) {
     stableGestureName = "";
     stableGestureCount = 0;
     return;
@@ -345,8 +345,8 @@ function handleGesture(result, poseResult) {
     stableGestureCount = 1;
   }
 
-  modelStatus.textContent = `${sign.sign} ${stableGestureCount}/7`;
-  if (stableGestureCount < 7) return;
+  modelStatus.textContent = `${sign.sign} ${stableGestureCount}/3`;
+  if (stableGestureCount < 3) return;
 
   spokenPhrase.textContent = sign.phrase;
   if (autoSpeak.checked) speak(sign.phrase);
@@ -356,9 +356,29 @@ function getDetectedGesture(result, poseResult) {
   const landmarks = result?.landmarks?.[0];
   if (!landmarks) return undefined;
 
+  const topGesture = result?.gestures?.[0]?.[0];
   const pose = poseResult?.landmarks?.[0];
   const customGesture = getCustomGesture(landmarks, pose);
   if (customGesture) return customGesture;
+
+  if (topGesture?.score > 0.55) {
+    const mappedGesture = mapBuiltInGesture(topGesture.categoryName, landmarks);
+    if (mappedGesture) return mappedGesture;
+  }
+
+  return undefined;
+}
+
+function mapBuiltInGesture(categoryName, landmarks) {
+  const center = getHandCenter(landmarks);
+  const motion = getHandMotion(center);
+
+  if (categoryName === "Thumb_Up") return gesture("YES", 0.8);
+  if (categoryName === "Thumb_Down") return gesture("NO", 0.8);
+  if (categoryName === "Victory") return gesture("OK", 0.78);
+  if (categoryName === "Closed_Fist") return motion.up ? gesture("HELP", 0.74) : gesture("NEED_HELP", 0.74);
+  if (categoryName === "Pointing_Up") return motion.side ? gesture("WHERE_PLACE", 0.72) : gesture("WHERE_IS", 0.72);
+  if (categoryName === "Open_Palm") return motion.side ? gesture("GOODBYE", 0.72) : gesture("HELLO", 0.72);
 
   return undefined;
 }
@@ -369,22 +389,27 @@ function getCustomGesture(landmarks, pose) {
   const center = getHandCenter(landmarks);
   const motion = getHandMotion(center);
   const zones = getBodyZones(pose);
-  const nearMouth = zones.mouth && distance(center, zones.mouth) < 0.15;
-  const nearForehead = zones.forehead && distance(center, zones.forehead) < 0.18;
-  const nearChest = zones.chest && distance(center, zones.chest) < 0.25;
+  const nearMouth = distance(center, zones.mouth) < 0.24;
+  const nearForehead = distance(center, zones.forehead) < 0.24;
+  const nearChest = distance(center, zones.chest) < 0.32;
+  const fromSide = Math.abs(center.x - 0.5) > 0.23;
 
   if (isThumbUp(landmarks, fingers)) return gesture("YES", 0.9);
   if (isThumbDown(landmarks, fingers)) return gesture("NO", 0.9);
   if (isVictory(fingers)) return gesture("OK", 0.88);
-  if (nearChest && count === 0 && motion.up) return gesture("HELP", 0.86);
-  if (nearChest && count === 0 && !motion.active) return gesture("NEED_HELP", 0.86);
-  if (nearForehead && fingers.index && count <= 2) return gesture("DONT_UNDERSTAND", 0.86);
-  if (nearMouth && count >= 4 && motion.outward) return gesture("THANKS", 0.86);
+  if (count >= 4 && motion.side) return gesture("GOODBYE", 0.76);
+  if (count >= 4 && !motion.active) return gesture(fromSide ? "LOST" : "HELLO", 0.7);
+  if (nearChest && count === 0 && motion.up) return gesture("HELP", 0.76);
+  if (nearChest && count === 0) return gesture("NEED_HELP", 0.72);
+  if (nearForehead && fingers.index && count <= 2) return gesture("DONT_UNDERSTAND", 0.76);
+  if (nearMouth && count >= 3 && motion.outward) return gesture("THANKS", 0.76);
+  if (fingers.index && count <= 2 && motion.side) return gesture("WHERE_PLACE", 0.7);
+  if (fingers.index && count <= 2) return gesture("WHERE_IS", 0.68);
 
   return undefined;
 }
 
-function gesture(categoryName, score = 0.86) {
+function gesture(categoryName, score = 0.72) {
   return { categoryName, score };
 }
 
@@ -428,7 +453,13 @@ function isVictory(fingers) {
 }
 
 function getBodyZones(pose) {
-  if (!pose) return {};
+  if (!pose) {
+    return {
+      mouth: { x: 0.5, y: 0.28 },
+      chest: { x: 0.5, y: 0.58 },
+      forehead: { x: 0.5, y: 0.18 }
+    };
+  }
   const nose = pose[0];
   const mouth = midpoint(pose[9], pose[10]) || nose;
   const shoulder = midpoint(pose[11], pose[12]);
