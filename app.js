@@ -10,56 +10,74 @@ const cameraSelect = document.querySelector("#cameraSelect");
 const voiceSelect = document.querySelector("#voiceSelect");
 const phraseGrid = document.querySelector("#phraseGrid");
 const guideList = document.querySelector("#guideList");
-const signForm = document.querySelector("#signForm");
-const newPhrase = document.querySelector("#newPhrase");
-const newHow = document.querySelector("#newHow");
-const newGesture = document.querySelector("#newGesture");
 const spokenPhrase = document.querySelector("#spokenPhrase");
 const cameraStatus = document.querySelector("#cameraStatus");
 const modelStatus = document.querySelector("#modelStatus");
 const speechStatus = document.querySelector("#speechStatus");
 
-const SIGNS_STORAGE_KEY = "vozsenias-signs-v1";
-
-const defaultSigns = [
-  { phrase: "Hola", sign: "Palma abierta", gesture: "Open_Palm", how: "Pone la mano frente al pecho, palma mirando a la camara. Estira los 5 dedos y separalos un poco. Mantenela quieta 1 segundo." },
-  { phrase: "Necesito ayuda", sign: "Puno cerrado", gesture: "Closed_Fist", how: "Pone la mano frente al pecho. Cerra todos los dedos fuerte, como haciendo un puno. Que no se vea ningun dedo estirado." },
-  { phrase: "Si", sign: "Pulgar arriba", gesture: "Thumb_Up", how: "Cerra la mano en puno y deja solo el pulgar levantado hacia arriba. La una del pulgar tiene que mirar de costado." },
-  { phrase: "No", sign: "Pulgar abajo", gesture: "Thumb_Down", how: "Cerra la mano en puno y deja solo el pulgar apuntando hacia abajo. Mantenelo en el centro de la camara." },
-  { phrase: "Estoy bien", sign: "V de victoria", gesture: "Victory", how: "Estira solo indice y medio formando una V. Pulgar, anular y menique quedan cerrados." },
-  { phrase: "Te quiero", sign: "Te quiero", gesture: "ILoveYou", how: "Estira pulgar, indice y menique. Dobla el dedo medio y el anular. Mantenelo quieto frente a la camara." },
-  { phrase: "Quiero hablar", sign: "Dedo hacia arriba", gesture: "Pointing_Up", how: "Estira solo el dedo indice hacia arriba. Los otros dedos quedan cerrados en puno." },
-  { phrase: "Gracias", sign: "Mano al menton hacia afuera", gesture: "THANKS", how: "Mano abierta. Toca el menton o la parte baja de la cara y empuja la mano hacia adelante." },
-  { phrase: "Por favor", sign: "Mano en el pecho en circulo", gesture: "PLEASE", how: "Mano abierta sobre el centro del pecho. Hace un circulo lento sin sacar la mano de esa zona." },
-  { phrase: "Perdon", sign: "Puno en el pecho", gesture: "SORRY", how: "Puno cerrado sobre el pecho. Mantenelo quieto o hace un circulo pequeno." },
-  { phrase: "Tengo hambre", sign: "Mano hacia la boca", gesture: "HUNGRY", how: "Junta los dedos como pellizco y llevalos a la boca. La mano tiene que quedar cerca de la boca." },
-  { phrase: "Tengo sed", sign: "Dedo cerca de la boca", gesture: "THIRSTY", how: "Estira solo el indice y acercalo a la boca o menton. Los otros dedos quedan cerrados." },
-  { phrase: "Necesito ir al bano", sign: "Mano en B moviendose", gesture: "BATHROOM", how: "Mano vertical frente al pecho. Estira los dedos juntos y movela de lado a lado." },
-  { phrase: "Me duele", sign: "Dedos apuntando al dolor", gesture: "PAIN", how: "Estira el indice y apunta a una parte del cuerpo: pecho, hombro, cara o brazo." },
-  { phrase: "Llamen a mi familia", sign: "Gesto de llamar", gesture: "CALL_FAMILY", how: "Pulgar y menique abiertos como telefono. Ponelo cerca de la oreja y mantenelo ahi." },
-  { phrase: "Llamen a emergencias", sign: "Gesto de telefono urgente", gesture: "CALL_EMERGENCY", how: "Mismo gesto de telefono cerca de la oreja, pero movelo rapido dos veces." },
-  { phrase: "Estoy perdido", sign: "Manos buscando", gesture: "LOST", how: "Abri una o dos manos con palma hacia arriba, lejos del centro del pecho, como preguntando donde." },
-  { phrase: "No entiendo", sign: "Mano cerca de la frente", gesture: "DONT_UNDERSTAND", how: "Lleva la mano cerca de la frente. Mejor si estiras el indice o abris la mano." },
-  { phrase: "Repeti, por favor", sign: "Mano vuelve hacia mi", gesture: "REPEAT", how: "Pone la mano frente al pecho y movela hacia tu cuerpo, como trayendo algo hacia vos." },
-  { phrase: "Mas despacio", sign: "Mano bajando lento", gesture: "SLOWER", how: "Palma abierta mirando hacia abajo. Baja la mano despacio desde el pecho." },
-  { phrase: "Estoy cansado", sign: "Manos bajan desde hombros", gesture: "TIRED", how: "Pone la mano cerca del hombro y bajala hacia el pecho. Si usas las dos manos, mejor." },
-  { phrase: "Tengo frio", sign: "Brazos temblando", gesture: "COLD", how: "Mano o puno cerca del pecho. Hace movimientos cortitos de izquierda a derecha, como temblando." },
-  { phrase: "Tengo calor", sign: "Mano abanica la cara", gesture: "HOT", how: "Mano abierta cerca de la cara. Movela de lado a lado como abanico." },
-  { phrase: "Quiero comer", sign: "Dedos hacia la boca", gesture: "EAT", how: "Junta los dedos y llevalos varias veces hacia la boca, como comiendo." },
-  { phrase: "Quiero agua", sign: "Senia de agua", gesture: "WATER", how: "Cerca de la boca, levanta tres dedos o hace gesto de beber agua." },
-  { phrase: "Quiero dormir", sign: "Mano baja por la cara", gesture: "SLEEP", how: "Mano abierta cerca de la cara. Bajala lentamente como cerrando los ojos." },
-  { phrase: "Estoy esperando", sign: "Manos en espera", gesture: "WAITING", how: "Mano abierta frente al pecho, palma hacia arriba, quieta por un segundo." },
-  { phrase: "Voy a casa", sign: "Mano hacia casa", gesture: "HOME", how: "Mano abierta o dedos juntos cerca del pecho. Movela hacia un costado." },
-  { phrase: "Necesito escribir", sign: "Gesto de lapiz", gesture: "WRITE", how: "Hace pinza con pulgar e indice, como agarrando un lapiz. Movela poquito como escribiendo." },
-  { phrase: "No puedo hablar", sign: "Mano frente a la boca", gesture: "CANT_SPEAK", how: "Mano abierta tapando la boca. Mantenela quieta medio segundo." }
+const signs = [
+  {
+    phrase: "Escuchar",
+    sign: "Escuchar",
+    gesture: "LISTEN",
+    how: "Lleva la mano cerca de la oreja. Mantenela ahi un segundo, como senalando que estas escuchando."
+  },
+  {
+    phrase: "Explicar",
+    sign: "Explicar",
+    gesture: "EXPLAIN",
+    how: "Pone la mano frente al pecho con indice y pulgar activos. Movela suave hacia adelante, como mostrando una idea."
+  },
+  {
+    phrase: "Felicitar",
+    sign: "Felicitar",
+    gesture: "CONGRATULATE",
+    how: "Mano abierta frente al pecho o cara. Hace un movimiento corto hacia arriba, como celebrando."
+  },
+  {
+    phrase: "Entender",
+    sign: "Entender",
+    gesture: "UNDERSTAND",
+    how: "Estira solo el indice y llevalo cerca de la frente. Dejalo quieto un instante."
+  },
+  {
+    phrase: "Invitar",
+    sign: "Invitar",
+    gesture: "INVITE",
+    how: "Mano abierta al costado del cuerpo. Movela hacia el centro, como llamando a alguien a venir."
+  },
+  {
+    phrase: "Necesitar",
+    sign: "Necesitar",
+    gesture: "NEED",
+    how: "Estira el indice y bajalo un poco frente al pecho, como marcando necesidad."
+  },
+  {
+    phrase: "Disculpar",
+    sign: "Disculpar",
+    gesture: "APOLOGIZE",
+    how: "Puno cerrado sobre el pecho. Hace un movimiento pequeno y lento, sin sacar el puno del pecho."
+  },
+  {
+    phrase: "Permiso",
+    sign: "Permiso",
+    gesture: "PERMISSION",
+    how: "Mano abierta sobre la otra mano o frente al pecho. Deslizala suavemente hacia adelante."
+  },
+  {
+    phrase: "Hablar",
+    sign: "Hablar",
+    gesture: "SPEAK",
+    how: "Lleva dos dedos o la mano cerca de la boca. Movela apenas hacia afuera, como saliendo la palabra."
+  }
 ];
-
-let signs = loadSigns();
 
 let stream;
 let recognizer;
 let poseLandmarker;
 let lastVideoTime = -1;
+let lastPoseAt = 0;
+let lastPoseResult;
 let lastSpokenPhrase = "";
 let lastSpokenAt = 0;
 let stableGestureName = "";
@@ -104,27 +122,6 @@ cameraSelect.addEventListener("change", () => {
   }
 });
 
-signForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-
-  const phrase = newPhrase.value.trim();
-  const how = newHow.value.trim();
-  if (!phrase || !how) return;
-
-  signs.push({
-    id: crypto.randomUUID(),
-    phrase,
-    sign: phrase,
-    gesture: newGesture.value,
-    how
-  });
-
-  saveSigns();
-  renderPhraseButtons();
-  renderGestureGuide();
-  signForm.reset();
-});
-
 async function start() {
   startButton.disabled = true;
   cameraStatus.textContent = "Abriendo camara";
@@ -157,6 +154,7 @@ function stop() {
   stream?.getTracks().forEach((track) => track.stop());
   stream = undefined;
   video.srcObject = null;
+  handMotionHistory = [];
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   startButton.disabled = false;
   stopButton.disabled = true;
@@ -172,13 +170,15 @@ async function initCamera() {
   const videoConstraints = selectedCameraId
     ? {
         deviceId: { exact: selectedCameraId },
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
+        width: { ideal: 640 },
+        height: { ideal: 480 },
+        frameRate: { ideal: 24, max: 30 }
       }
     : {
         facingMode: "user",
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
+        width: { ideal: 640 },
+        height: { ideal: 480 },
+        frameRate: { ideal: 24, max: 30 }
       };
 
   stream = await navigator.mediaDevices.getUserMedia({
@@ -208,10 +208,10 @@ async function initRecognizer() {
         delegate: "GPU"
       },
       runningMode: "VIDEO",
-      numHands: 2,
-      minHandDetectionConfidence: 0.72,
-      minHandPresenceConfidence: 0.72,
-      minTrackingConfidence: 0.72
+      numHands: 1,
+      minHandDetectionConfidence: 0.62,
+      minHandPresenceConfidence: 0.62,
+      minTrackingConfidence: 0.62
     });
   }
 
@@ -224,84 +224,88 @@ async function initRecognizer() {
       },
       runningMode: "VIDEO",
       numPoses: 1,
-      minPoseDetectionConfidence: 0.65,
-      minPosePresenceConfidence: 0.65,
-      minTrackingConfidence: 0.65
+      minPoseDetectionConfidence: 0.5,
+      minPosePresenceConfidence: 0.5,
+      minTrackingConfidence: 0.5
     });
   }
 
-  modelStatus.textContent = "IA mano + cuerpo";
+  modelStatus.textContent = "IA movil lista";
 }
 
 function loop() {
   if (!running) return;
   resizeCanvas();
 
-  if (video.currentTime !== lastVideoTime && (recognizer || poseLandmarker)) {
+  if (video.currentTime !== lastVideoTime && recognizer) {
     lastVideoTime = video.currentTime;
     const now = performance.now();
-    const gestureResult = recognizer?.recognizeForVideo(video, now);
-    const poseResult = poseLandmarker?.detectForVideo(video, now);
-    drawResult(gestureResult, poseResult);
-    handleGesture(gestureResult, poseResult);
+    const gestureResult = recognizer.recognizeForVideo(video, now);
+
+    if (poseLandmarker && now - lastPoseAt > 180) {
+      lastPoseResult = poseLandmarker.detectForVideo(video, now);
+      lastPoseAt = now;
+    }
+
+    drawResult(gestureResult, lastPoseResult);
+    handleGesture(gestureResult, lastPoseResult);
   }
 
   requestAnimationFrame(loop);
 }
 
 function resizeCanvas() {
-  const width = video.videoWidth || canvas.clientWidth;
-  const height = video.videoHeight || canvas.clientHeight;
+  const rect = canvas.getBoundingClientRect();
+  const ratio = Math.min(window.devicePixelRatio || 1, 2);
+  const width = Math.round(rect.width * ratio);
+  const height = Math.round(rect.height * ratio);
+
   if (canvas.width !== width || canvas.height !== height) {
     canvas.width = width;
     canvas.height = height;
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
   }
 }
 
 function drawResult(result, poseResult) {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.save();
-  ctx.scale(-1, 1);
-  ctx.translate(-canvas.width, 0);
+  const rect = canvas.getBoundingClientRect();
+  ctx.clearRect(0, 0, rect.width, rect.height);
 
+  const posePoints = [0, 9, 10, 11, 12];
   for (const pose of poseResult?.landmarks ?? []) {
-    for (const point of pose) {
-      ctx.beginPath();
-      ctx.arc(point.x * canvas.width, point.y * canvas.height, 4, 0, Math.PI * 2);
-      ctx.fillStyle = "#0ea5e9";
-      ctx.fill();
+    for (const index of posePoints) {
+      const point = pose[index];
+      if (!point) continue;
+      drawPoint(point, rect.width, rect.height, 4, "#0ea5e9");
     }
   }
 
   for (const landmarks of result?.landmarks ?? []) {
-    for (const point of landmarks) {
-      ctx.beginPath();
-      ctx.arc(point.x * canvas.width, point.y * canvas.height, 6, 0, Math.PI * 2);
-      ctx.fillStyle = "#16a34a";
-      ctx.fill();
+    for (const index of [0, 4, 8, 12, 16, 20]) {
+      drawPoint(landmarks[index], rect.width, rect.height, 5, "#16a34a");
     }
   }
+}
 
-  ctx.restore();
+function drawPoint(point, width, height, radius, color) {
+  if (!point) return;
+  ctx.beginPath();
+  ctx.arc((1 - point.x) * width, point.y * height, radius, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
 }
 
 function handleGesture(result, poseResult) {
   const detectedGesture = getDetectedGesture(result, poseResult);
-  const hasBody = !poseLandmarker || (poseResult?.landmarks?.[0]?.length ?? 0) > 0;
 
-  if (!hasBody) {
-    modelStatus.textContent = "Mostra torso y manos";
-    return;
-  }
-
-  if (!detectedGesture || detectedGesture.score < 0.82) {
+  if (!detectedGesture || detectedGesture.score < 0.76) {
     stableGestureName = "";
     stableGestureCount = 0;
     return;
   }
 
-  const phrase = getPhraseForGesture(detectedGesture.categoryName);
-  if (!phrase) return;
+  const sign = signs.find((item) => item.gesture === detectedGesture.categoryName);
+  if (!sign) return;
 
   if (stableGestureName === detectedGesture.categoryName) {
     stableGestureCount += 1;
@@ -310,50 +314,33 @@ function handleGesture(result, poseResult) {
     stableGestureCount = 1;
   }
 
-  const signLabel = getSignLabelForGesture(detectedGesture.categoryName) ?? detectedGesture.categoryName;
-  modelStatus.textContent = `${signLabel} ${stableGestureCount}/5 ${Math.round(detectedGesture.score * 100)}%`;
+  modelStatus.textContent = `${sign.sign} ${stableGestureCount}/4`;
+  if (stableGestureCount < 4) return;
 
-  if (stableGestureCount < 5) return;
-
-  spokenPhrase.textContent = phrase;
-
-  if (autoSpeak.checked) {
-    speak(phrase);
-  }
+  spokenPhrase.textContent = sign.phrase;
+  if (autoSpeak.checked) speak(sign.phrase);
 }
 
 function getDetectedGesture(result, poseResult) {
-  const topGesture = result?.gestures?.[0]?.[0];
   const landmarks = result?.landmarks?.[0];
-  const pose = poseResult?.landmarks?.[0];
   if (!landmarks) return undefined;
 
-  if (isReliableBuiltInGesture(topGesture)) return topGesture;
-
+  const topGesture = result?.gestures?.[0]?.[0];
+  const pose = poseResult?.landmarks?.[0];
   const customGesture = getCustomGesture(landmarks, pose);
   if (customGesture) return customGesture;
 
-  if (topGesture?.score >= 0.82) return topGesture;
-
-  const fingerState = getFingerState(landmarks);
-  const extendedCount = Object.values(fingerState).filter(Boolean).length;
-
-  if (extendedCount >= 4 && fingerState.index && fingerState.middle && fingerState.ring && fingerState.pinky) {
-    return { categoryName: "Open_Palm", score: 0.86 };
+  if (topGesture?.categoryName === "Pointing_Up" && topGesture.score > 0.72) {
+    return gesture("NEED", 0.78);
   }
-
-  if (fingerState.thumb && fingerState.index && fingerState.pinky && !fingerState.middle && !fingerState.ring) {
-    return { categoryName: "ILoveYou", score: 0.86 };
+  if (topGesture?.categoryName === "Closed_Fist" && topGesture.score > 0.72) {
+    return gesture("APOLOGIZE", 0.78);
+  }
+  if (topGesture?.categoryName === "Open_Palm" && topGesture.score > 0.72) {
+    return gesture("PERMISSION", 0.78);
   }
 
   return undefined;
-}
-
-function isReliableBuiltInGesture(gestureResult) {
-  if (!gestureResult || gestureResult.score < 0.84) return false;
-  return ["Closed_Fist", "Thumb_Up", "Thumb_Down", "Victory", "Pointing_Up"].includes(
-    gestureResult.categoryName
-  );
 }
 
 function getCustomGesture(landmarks, pose) {
@@ -362,44 +349,26 @@ function getCustomGesture(landmarks, pose) {
   const center = getHandCenter(landmarks);
   const motion = getHandMotion(center);
   const zones = getBodyZones(pose);
-  const nearMouth = zones.mouth && distance(center, zones.mouth) < 0.13;
-  const nearFace = zones.face && distance(center, zones.face) < 0.18;
-  const nearForehead = zones.forehead && distance(center, zones.forehead) < 0.16;
-  const nearEar = zones.ear && distance(center, zones.ear) < 0.16;
-  const nearChest = zones.chest && distance(center, zones.chest) < 0.22;
-  const nearShoulder = zones.shoulder && distance(center, zones.shoulder) < 0.18;
-  const farSide = Math.abs(center.x - 0.5) > 0.24;
+  const nearEar = zones.ear && distance(center, zones.ear) < 0.17;
+  const nearMouth = zones.mouth && distance(center, zones.mouth) < 0.15;
+  const nearForehead = zones.forehead && distance(center, zones.forehead) < 0.18;
+  const nearChest = zones.chest && distance(center, zones.chest) < 0.25;
+  const fromSide = Math.abs(center.x - 0.5) > 0.2;
 
-  if (nearEar && fingers.thumb && fingers.pinky && !fingers.middle && !fingers.ring) {
-    return motion.fast ? gesture("CALL_EMERGENCY") : gesture("CALL_FAMILY");
-  }
-
-  if (nearMouth && count >= 4) return gesture("CANT_SPEAK");
-  if (nearMouth && fingers.index && !fingers.middle && !fingers.ring) return gesture("THIRSTY");
-  if (nearMouth && fingers.thumb && fingers.index && fingers.middle && !fingers.ring) return gesture("WATER");
-  if (nearMouth && count <= 2) return motion.active ? gesture("EAT") : gesture("HUNGRY");
-  if (nearFace && count >= 4 && motion.down) return gesture("SLEEP");
-  if (nearFace && count >= 4 && motion.side) return gesture("HOT");
-  if (nearForehead) return gesture("DONT_UNDERSTAND");
-
-  if (nearShoulder && motion.down) return gesture("TIRED");
-
-  if (nearChest && count === 0) return motion.side ? gesture("COLD") : gesture("SORRY");
-  if (nearChest && count >= 4 && motion.circleLike) return gesture("PLEASE");
-  if (nearChest && count >= 4 && motion.down) return gesture("SLOWER");
-  if (nearChest && count >= 4 && motion.towardCenter) return gesture("REPEAT");
-  if (nearChest && count >= 4 && motion.side) return gesture("HOME");
-  if (nearChest && count >= 4 && !motion.active) return gesture("WAITING");
-
-  if (count >= 4 && farSide) return gesture("LOST");
-  if (fingers.index && !fingers.middle && !fingers.ring && !nearMouth) return gesture("PAIN");
-  if (fingers.thumb && fingers.index && !fingers.middle && !fingers.ring && motion.active) return gesture("WRITE");
-  if (count >= 4 && motion.side) return gesture("BATHROOM");
+  if (nearEar) return gesture("LISTEN");
+  if (nearMouth && motion.outward) return gesture("SPEAK");
+  if (nearForehead && fingers.index && count <= 2) return gesture("UNDERSTAND");
+  if (nearChest && count === 0) return gesture("APOLOGIZE");
+  if (nearChest && fingers.index && motion.down) return gesture("NEED");
+  if (nearChest && count >= 4 && motion.up) return gesture("CONGRATULATE");
+  if (nearChest && count >= 4 && motion.outward) return gesture("PERMISSION");
+  if (nearChest && fingers.index && fingers.thumb && motion.outward) return gesture("EXPLAIN");
+  if (fromSide && count >= 4 && motion.towardCenter) return gesture("INVITE");
 
   return undefined;
 }
 
-function gesture(categoryName, score = 0.86) {
+function gesture(categoryName, score = 0.82) {
   return { categoryName, score };
 }
 
@@ -413,43 +382,30 @@ function getHandCenter(landmarks) {
 
 function getHandMotion(center) {
   handMotionHistory.push(center);
-  if (handMotionHistory.length > 10) handMotionHistory.shift();
+  if (handMotionHistory.length > 8) handMotionHistory.shift();
 
   const first = handMotionHistory[0] ?? center;
   const last = handMotionHistory[handMotionHistory.length - 1] ?? center;
   const dx = last.x - first.x;
   const dy = last.y - first.y;
-  const spreadX = Math.max(...handMotionHistory.map((point) => point.x)) - Math.min(...handMotionHistory.map((point) => point.x));
-  const spreadY = Math.max(...handMotionHistory.map((point) => point.y)) - Math.min(...handMotionHistory.map((point) => point.y));
 
   return {
-    active: spreadX > 0.035 || spreadY > 0.035,
-    fast: spreadX > 0.08 || spreadY > 0.08,
-    side: Math.abs(dx) > 0.045,
-    down: dy > 0.045,
-    towardCenter: Math.abs(last.x - 0.5) < Math.abs(first.x - 0.5) - 0.025,
-    circleLike: spreadX > 0.025 && spreadY > 0.025
+    up: dy < -0.035,
+    down: dy > 0.035,
+    outward: Math.abs(dx) > 0.035 || Math.abs(dy) > 0.035,
+    towardCenter: Math.abs(last.x - 0.5) < Math.abs(first.x - 0.5) - 0.025
   };
 }
 
 function getBodyZones(pose) {
   if (!pose) return {};
-
   const nose = pose[0];
-  const mouthLeft = pose[9];
-  const mouthRight = pose[10];
-  const leftShoulder = pose[11];
-  const rightShoulder = pose[12];
-  const leftEar = pose[7];
-  const rightEar = pose[8];
-  const mouth = midpoint(mouthLeft, mouthRight) || nose;
-  const shoulder = midpoint(leftShoulder, rightShoulder);
-  const chest = shoulder ? { x: shoulder.x, y: shoulder.y + 0.16 } : undefined;
-  const face = nose;
+  const mouth = midpoint(pose[9], pose[10]) || nose;
+  const shoulder = midpoint(pose[11], pose[12]);
+  const chest = shoulder ? { x: shoulder.x, y: shoulder.y + 0.14 } : undefined;
   const forehead = nose ? { x: nose.x, y: nose.y - 0.08 } : undefined;
-  const ear = nearestToHand([leftEar, rightEar]);
-
-  return { mouth, shoulder, chest, face, forehead, ear };
+  const ear = nearestToHand([pose[7], pose[8]]);
+  return { mouth, chest, forehead, ear };
 }
 
 function midpoint(a, b) {
@@ -471,23 +427,12 @@ function distance(a, b) {
 
 function getFingerState(landmarks) {
   const wrist = landmarks[0];
-  const thumbTip = landmarks[4];
-  const thumbIp = landmarks[3];
-  const indexTip = landmarks[8];
-  const indexPip = landmarks[6];
-  const middleTip = landmarks[12];
-  const middlePip = landmarks[10];
-  const ringTip = landmarks[16];
-  const ringPip = landmarks[14];
-  const pinkyTip = landmarks[20];
-  const pinkyPip = landmarks[18];
-
   return {
-    thumb: Math.abs(thumbTip.x - wrist.x) > Math.abs(thumbIp.x - wrist.x) + 0.035,
-    index: indexTip.y < indexPip.y - 0.025,
-    middle: middleTip.y < middlePip.y - 0.025,
-    ring: ringTip.y < ringPip.y - 0.025,
-    pinky: pinkyTip.y < pinkyPip.y - 0.025
+    thumb: Math.abs(landmarks[4].x - wrist.x) > Math.abs(landmarks[3].x - wrist.x) + 0.035,
+    index: landmarks[8].y < landmarks[6].y - 0.025,
+    middle: landmarks[12].y < landmarks[10].y - 0.025,
+    ring: landmarks[16].y < landmarks[14].y - 0.025,
+    pinky: landmarks[20].y < landmarks[18].y - 0.025
   };
 }
 
@@ -559,11 +504,6 @@ async function loadCameras() {
     if (preferredCamera) {
       cameraSelect.value = currentValue || preferredCamera.deviceId;
       cameraStatus.textContent = `Camara: ${cameraSelect.selectedOptions[0]?.textContent ?? "lista"}`;
-    } else {
-      const option = document.createElement("option");
-      option.value = "";
-      option.textContent = "Sin camaras";
-      cameraSelect.append(option);
     }
   } catch (error) {
     console.error(error);
@@ -596,39 +536,6 @@ function showEnvironmentHint() {
   }
 }
 
-function loadSigns() {
-  try {
-    const storedRaw = localStorage.getItem(SIGNS_STORAGE_KEY);
-    if (storedRaw !== null) {
-      const stored = JSON.parse(storedRaw);
-      if (Array.isArray(stored)) return stored;
-    }
-  } catch (error) {
-    console.error(error);
-  }
-
-  return defaultSigns.map((sign, index) => ({ id: `default-${index + 1}`, ...sign }));
-}
-
-function saveSigns() {
-  localStorage.setItem(SIGNS_STORAGE_KEY, JSON.stringify(signs));
-}
-
-function getPhraseForGesture(gestureName) {
-  return signs.find((sign) => sign.gesture === gestureName)?.phrase;
-}
-
-function getSignLabelForGesture(gestureName) {
-  return signs.find((sign) => sign.gesture === gestureName)?.sign;
-}
-
-function removeSign(signId) {
-  signs = signs.filter((sign) => sign.id !== signId);
-  saveSigns();
-  renderPhraseButtons();
-  renderGestureGuide();
-}
-
 function renderPhraseButtons() {
   phraseGrid.innerHTML = "";
 
@@ -636,7 +543,7 @@ function renderPhraseButtons() {
     const button = document.createElement("button");
     button.className = "phrase-button";
     button.type = "button";
-    button.innerHTML = `<strong>${sign.phrase}</strong><span>${sign.sign}${sign.gesture ? " - camara" : " - boton"}</span>`;
+    button.innerHTML = `<strong>${sign.phrase}</strong><span>${sign.sign} - camara</span>`;
     button.addEventListener("click", () => {
       spokenPhrase.textContent = sign.phrase;
       speak(sign.phrase);
@@ -651,13 +558,7 @@ function renderGestureGuide() {
   for (const sign of signs) {
     const item = document.createElement("article");
     item.className = "guide-item";
-    item.innerHTML = `<strong>${sign.sign}</strong><span class="guide-tag">${sign.gesture ? "Camara" : "Boton"}</span><span>${sign.how}</span><button class="delete-sign" type="button" data-sign-id="${sign.id}">Borrar</button>`;
+    item.innerHTML = `<strong>${sign.sign}</strong><span class="guide-tag">Camara</span><span>${sign.how}</span>`;
     guideList.append(item);
   }
 }
-
-guideList.addEventListener("click", (event) => {
-  const deleteButton = event.target.closest(".delete-sign");
-  if (!deleteButton) return;
-  removeSign(deleteButton.dataset.signId);
-});

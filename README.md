@@ -7,49 +7,25 @@ Aplicacion web movil para probar camara, deteccion de gestos y voz en vivo.
 - Abre la camara frontal del celular.
 - Usa MediaPipe para detectar manos y cuerpo desde la camara.
 - Convierte esos gestos en frases en espanol con `speechSynthesis`.
-- Incluye 30 frases/senias con deteccion aproximada por camara.
+- Incluye las 9 palabras importantes de la imagen: escuchar, explicar, felicitar, entender, invitar, necesitar, disculpar, permiso y hablar.
 - Permite tocar frases rapidas para probar el altavoz.
-- Permite agregar y borrar senias desde la aplicacion.
 - Se puede instalar como PWA si se publica por HTTPS.
 
-## 30 senias/frases incluidas
+## Senias incluidas
 
-Las 30 intentan detectarse desde la camara usando puntos de mano, cuerpo y movimiento. Las senias complejas son aproximadas: para precision profesional hace falta entrenar un modelo propio con videos reales de Lengua de Senias Argentina.
+Las 9 intentan detectarse desde la camara usando puntos de mano, cuerpo y movimiento. Estan optimizadas para celular con video liviano y overlay alineado sin recorte. Para precision profesional en LSA hace falta entrenar un modelo propio con videos reales.
 
-La app ahora tiene un catalogo editable. Desde la pantalla principal se puede agregar una frase, escribir la descripcion validada de la senia LSA, elegir si usa un detector de camara disponible o si queda como boton, y borrar senias que no correspondan.
-
-| # | Frase hablada | Gesto/senia en espanol | Camara |
+| # | Frase hablada | Gesto/senia | Camara |
 | --- | --- | --- | --- |
-| 1 | Hola | Palma abierta | Si |
-| 2 | Necesito ayuda | Puno cerrado | Si |
-| 3 | Si | Pulgar arriba | Si |
-| 4 | No | Pulgar abajo | Si |
-| 5 | Estoy bien | V de victoria | Si |
-| 6 | Te quiero | Te quiero | Si |
-| 7 | Quiero hablar | Dedo hacia arriba | Si |
-| 8 | Gracias | Mano al menton hacia afuera | Si |
-| 9 | Por favor | Mano en el pecho en circulo | Si |
-| 10 | Perdon | Puno en el pecho | Si |
-| 11 | Tengo hambre | Mano hacia la boca | Si |
-| 12 | Tengo sed | Dedo cerca de la boca | Si |
-| 13 | Necesito ir al bano | Mano en B moviendose | Si |
-| 14 | Me duele | Dedos apuntando al dolor | Si |
-| 15 | Llamen a mi familia | Gesto de llamar | Si |
-| 16 | Llamen a emergencias | Gesto de telefono urgente | Si |
-| 17 | Estoy perdido | Manos buscando | Si |
-| 18 | No entiendo | Mano cerca de la frente | Si |
-| 19 | Repeti, por favor | Mano vuelve hacia mi | Si |
-| 20 | Mas despacio | Mano bajando lento | Si |
-| 21 | Estoy cansado | Manos bajan desde hombros | Si |
-| 22 | Tengo frio | Brazos temblando | Si |
-| 23 | Tengo calor | Mano abanica la cara | Si |
-| 24 | Quiero comer | Dedos hacia la boca | Si |
-| 25 | Quiero agua | Senia de agua | Si |
-| 26 | Quiero dormir | Mano baja por la cara | Si |
-| 27 | Estoy esperando | Manos en espera | Si |
-| 28 | Voy a casa | Mano hacia casa | Si |
-| 29 | Necesito escribir | Gesto de lapiz | Si |
-| 30 | No puedo hablar | Mano frente a la boca | Si |
+| 1 | Escuchar | Mano cerca de la oreja | Si |
+| 2 | Explicar | Mano frente al pecho hacia adelante | Si |
+| 3 | Felicitar | Mano abierta subiendo | Si |
+| 4 | Entender | Indice cerca de la frente | Si |
+| 5 | Invitar | Mano abierta desde el costado hacia el centro | Si |
+| 6 | Necesitar | Indice bajando frente al pecho | Si |
+| 7 | Disculpar | Puno sobre el pecho | Si |
+| 8 | Permiso | Mano abierta deslizando hacia adelante | Si |
+| 9 | Hablar | Mano cerca de la boca hacia afuera | Si |
 
 ## Como subirlo a GitHub y conectarlo a Vercel
 
