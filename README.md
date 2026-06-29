@@ -7,7 +7,7 @@ Aplicacion web movil para probar camara, deteccion de gestos y voz en vivo.
 - Abre la camara frontal del celular.
 - Usa MediaPipe para detectar manos y cuerpo desde la camara.
 - Convierte esos gestos en frases en espanol con `speechSynthesis`.
-- Incluye frases basicas: Hola, Adios, Necesito ayuda, Estoy perdido, Donde queda, Donde es, Ayuda, No entiendo, Si, No, Estoy bien, Gracias y la letra C.
+- Incluye frases basicas: Hola, Adios, Necesito ayuda, Estoy perdido, Donde queda, Donde es, Ayuda, No entiendo, Si, No, Estoy bien y Gracias.
 - Usa el microfono para transcribir en pantalla lo que dice otra persona.
 - Permite tocar frases rapidas para probar el altavoz.
 - Se puede instalar como PWA si se publica por HTTPS.
@@ -30,7 +30,6 @@ Las 9 intentan detectarse desde la camara usando puntos de mano, cuerpo y movimi
 | 10 | No | Pulgar abajo | Si |
 | 11 | Estoy bien | V o pulgar arriba | Si |
 | 12 | Gracias | Mano desde boca/menton hacia afuera | Si |
-| 13 | La letra C | Mano curva como C | Si |
 
 ## Como subirlo a GitHub y conectarlo a Vercel
 

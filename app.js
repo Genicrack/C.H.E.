@@ -92,10 +92,10 @@ const signs = [
     how: "Mano abierta cerca del menton o boca, movela hacia adelante."
   },
   {
-    phrase: "La letra C",
-    sign: "Letra C",
-    gesture: "LETTER_C",
-    how: "Curva la mano como formando una C. Pulgar e indice separados, dedos doblados."
+    phrase: "Gracias",
+    sign: "Gracias",
+    gesture: "THANKS",
+    how: "Mano abierta cerca del menton o boca, movela hacia adelante."
   }
 ];
 
@@ -329,7 +329,7 @@ function drawPoint(point, width, height, radius, color) {
 function handleGesture(result, poseResult) {
   const detectedGesture = getDetectedGesture(result, poseResult);
 
-  if (!detectedGesture || detectedGesture.score < 0.76) {
+  if (!detectedGesture || detectedGesture.score < 0.84) {
     stableGestureName = "";
     stableGestureCount = 0;
     return;
@@ -345,8 +345,8 @@ function handleGesture(result, poseResult) {
     stableGestureCount = 1;
   }
 
-  modelStatus.textContent = `${sign.sign} ${stableGestureCount}/4`;
-  if (stableGestureCount < 4) return;
+  modelStatus.textContent = `${sign.sign} ${stableGestureCount}/7`;
+  if (stableGestureCount < 7) return;
 
   spokenPhrase.textContent = sign.phrase;
   if (autoSpeak.checked) speak(sign.phrase);
@@ -356,29 +356,9 @@ function getDetectedGesture(result, poseResult) {
   const landmarks = result?.landmarks?.[0];
   if (!landmarks) return undefined;
 
-  const topGesture = result?.gestures?.[0]?.[0];
   const pose = poseResult?.landmarks?.[0];
   const customGesture = getCustomGesture(landmarks, pose);
   if (customGesture) return customGesture;
-
-  if (topGesture?.categoryName === "Pointing_Up" && topGesture.score > 0.72) {
-    return gesture("WHERE_IS", 0.78);
-  }
-  if (topGesture?.categoryName === "Closed_Fist" && topGesture.score > 0.72) {
-    return gesture("NEED_HELP", 0.78);
-  }
-  if (topGesture?.categoryName === "Open_Palm" && topGesture.score > 0.72) {
-    return gesture("HELLO", 0.78);
-  }
-  if (topGesture?.categoryName === "Thumb_Up" && topGesture.score > 0.72) {
-    return gesture("YES", 0.78);
-  }
-  if (topGesture?.categoryName === "Thumb_Down" && topGesture.score > 0.72) {
-    return gesture("NO", 0.78);
-  }
-  if (topGesture?.categoryName === "Victory" && topGesture.score > 0.72) {
-    return gesture("OK", 0.78);
-  }
 
   return undefined;
 }
@@ -389,26 +369,22 @@ function getCustomGesture(landmarks, pose) {
   const center = getHandCenter(landmarks);
   const motion = getHandMotion(center);
   const zones = getBodyZones(pose);
-  const nearEar = zones.ear && distance(center, zones.ear) < 0.17;
   const nearMouth = zones.mouth && distance(center, zones.mouth) < 0.15;
   const nearForehead = zones.forehead && distance(center, zones.forehead) < 0.18;
   const nearChest = zones.chest && distance(center, zones.chest) < 0.25;
-  const fromSide = Math.abs(center.x - 0.5) > 0.2;
 
-  if (nearMouth && count >= 4 && motion.outward) return gesture("THANKS");
-  if (nearForehead && count <= 2) return gesture("DONT_UNDERSTAND");
-  if (nearChest && count === 0 && motion.up) return gesture("HELP");
-  if (nearChest && count === 0) return gesture("NEED_HELP");
-  if (nearChest && fingers.index && motion.down) return gesture("WHERE_PLACE");
-  if (nearChest && fingers.index && motion.up) return gesture("WHERE_IS");
-  if (fromSide && count >= 4) return gesture("LOST");
-  if (count >= 4 && motion.side) return gesture("GOODBYE");
-  if (isLetterC(landmarks, fingers)) return gesture("LETTER_C");
+  if (isThumbUp(landmarks, fingers)) return gesture("YES", 0.9);
+  if (isThumbDown(landmarks, fingers)) return gesture("NO", 0.9);
+  if (isVictory(fingers)) return gesture("OK", 0.88);
+  if (nearChest && count === 0 && motion.up) return gesture("HELP", 0.86);
+  if (nearChest && count === 0 && !motion.active) return gesture("NEED_HELP", 0.86);
+  if (nearForehead && fingers.index && count <= 2) return gesture("DONT_UNDERSTAND", 0.86);
+  if (nearMouth && count >= 4 && motion.outward) return gesture("THANKS", 0.86);
 
   return undefined;
 }
 
-function gesture(categoryName, score = 0.82) {
+function gesture(categoryName, score = 0.86) {
   return { categoryName, score };
 }
 
@@ -430,6 +406,7 @@ function getHandMotion(center) {
   const dy = last.y - first.y;
 
   return {
+    active: Math.abs(dx) > 0.04 || Math.abs(dy) > 0.04,
     up: dy < -0.035,
     down: dy > 0.035,
     side: Math.abs(dx) > 0.035,
@@ -438,15 +415,16 @@ function getHandMotion(center) {
   };
 }
 
-function isLetterC(landmarks, fingers) {
-  const thumbTip = landmarks[4];
-  const indexTip = landmarks[8];
-  const middleTip = landmarks[12];
-  const ringTip = landmarks[16];
-  const pinkyTip = landmarks[20];
-  const thumbIndexDistance = distance(thumbTip, indexTip);
-  const curledFingers = !fingers.middle && !fingers.ring && !fingers.pinky;
-  return curledFingers && thumbIndexDistance > 0.08 && thumbIndexDistance < 0.22 && indexTip.y < pinkyTip.y;
+function isThumbUp(landmarks, fingers) {
+  return fingers.thumb && !fingers.index && !fingers.middle && !fingers.ring && !fingers.pinky && landmarks[4].y < landmarks[2].y - 0.04;
+}
+
+function isThumbDown(landmarks, fingers) {
+  return fingers.thumb && !fingers.index && !fingers.middle && !fingers.ring && !fingers.pinky && landmarks[4].y > landmarks[2].y + 0.04;
+}
+
+function isVictory(fingers) {
+  return fingers.index && fingers.middle && !fingers.ring && !fingers.pinky;
 }
 
 function getBodyZones(pose) {
