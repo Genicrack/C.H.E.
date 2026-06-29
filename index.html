@@ -43,6 +43,18 @@
           </button>
         </div>
 
+        <section class="transcript-panel" aria-label="Texto hablado">
+          <div class="transcript-actions">
+            <h2>Lo que dicen</h2>
+            <button id="micButton" class="secondary-button" type="button">
+              <span aria-hidden="true">MIC</span>
+              Microfono
+            </button>
+          </div>
+          <p id="transcriptText">Toca Microfono para mostrar aca lo que va diciendo la otra persona.</p>
+          <span id="micStatus">Microfono apagado</span>
+        </section>
+
         <div class="settings-row">
           <label class="select-label wide-select">
             Camara
@@ -70,8 +82,8 @@
         <details class="notes">
           <summary>Como seguir</summary>
           <p>
-            Esta version esta enfocada en celular y usa solo las 9 palabras importantes de la imagen:
-            escuchar, explicar, felicitar, entender, invitar, necesitar, disculpar, permiso y hablar.
+            Esta version esta enfocada en celular. La camara intenta detectar las senias cargadas
+            y el microfono muestra en pantalla lo que dice la otra persona.
             Para precision profesional en LSA hace falta entrenar un modelo con videos reales.
           </p>
         </details>

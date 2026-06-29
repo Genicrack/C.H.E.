@@ -7,7 +7,8 @@ Aplicacion web movil para probar camara, deteccion de gestos y voz en vivo.
 - Abre la camara frontal del celular.
 - Usa MediaPipe para detectar manos y cuerpo desde la camara.
 - Convierte esos gestos en frases en espanol con `speechSynthesis`.
-- Incluye las 9 palabras importantes de la imagen: escuchar, explicar, felicitar, entender, invitar, necesitar, disculpar, permiso y hablar.
+- Incluye frases basicas: Hola, Adios, Necesito ayuda, Estoy perdido, Donde queda, Donde es, Ayuda, No entiendo, Si, No, Estoy bien, Gracias y la letra C.
+- Usa el microfono para transcribir en pantalla lo que dice otra persona.
 - Permite tocar frases rapidas para probar el altavoz.
 - Se puede instalar como PWA si se publica por HTTPS.
 
@@ -17,15 +18,19 @@ Las 9 intentan detectarse desde la camara usando puntos de mano, cuerpo y movimi
 
 | # | Frase hablada | Gesto/senia | Camara |
 | --- | --- | --- | --- |
-| 1 | Escuchar | Mano cerca de la oreja | Si |
-| 2 | Explicar | Mano frente al pecho hacia adelante | Si |
-| 3 | Felicitar | Mano abierta subiendo | Si |
-| 4 | Entender | Indice cerca de la frente | Si |
-| 5 | Invitar | Mano abierta desde el costado hacia el centro | Si |
-| 6 | Necesitar | Indice bajando frente al pecho | Si |
-| 7 | Disculpar | Puno sobre el pecho | Si |
-| 8 | Permiso | Mano abierta deslizando hacia adelante | Si |
-| 9 | Hablar | Mano cerca de la boca hacia afuera | Si |
+| 1 | Hola | Palma abierta moviendo de lado a lado | Si |
+| 2 | Adios | Palma abierta moviendo de lado a lado | Si |
+| 3 | Necesito ayuda | Puno cerca del pecho | Si |
+| 4 | Estoy perdido | Mano abierta lejos del centro | Si |
+| 5 | Donde queda | Indice de lado a lado | Si |
+| 6 | Donde es | Indice subiendo cerca del pecho | Si |
+| 7 | Ayuda | Puno subiendo cerca del pecho | Si |
+| 8 | No entiendo | Mano o indice cerca de la frente | Si |
+| 9 | Si | Pulgar arriba | Si |
+| 10 | No | Pulgar abajo | Si |
+| 11 | Estoy bien | V o pulgar arriba | Si |
+| 12 | Gracias | Mano desde boca/menton hacia afuera | Si |
+| 13 | La letra C | Mano curva como C | Si |
 
 ## Como subirlo a GitHub y conectarlo a Vercel
 

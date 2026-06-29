@@ -229,6 +229,47 @@ select {
   gap: 10px;
 }
 
+.transcript-panel {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #111720;
+}
+
+.transcript-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.transcript-actions h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+#transcriptText {
+  min-height: 96px;
+  margin: 0;
+  border-radius: 8px;
+  background: #05070a;
+  color: var(--text);
+  padding: 14px;
+  font-size: clamp(1.2rem, 5vw, 2rem);
+  line-height: 1.2;
+}
+
+#micStatus {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.listening {
+  background: var(--danger);
+}
+
 .phrase-button,
 .guide-item {
   min-height: 64px;
@@ -341,6 +382,10 @@ select {
   }
 
   .phrase-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .transcript-actions {
     grid-template-columns: 1fr;
   }
 }

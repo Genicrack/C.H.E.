@@ -10,6 +10,9 @@ const cameraSelect = document.querySelector("#cameraSelect");
 const voiceSelect = document.querySelector("#voiceSelect");
 const phraseGrid = document.querySelector("#phraseGrid");
 const guideList = document.querySelector("#guideList");
+const micButton = document.querySelector("#micButton");
+const transcriptText = document.querySelector("#transcriptText");
+const micStatus = document.querySelector("#micStatus");
 const spokenPhrase = document.querySelector("#spokenPhrase");
 const cameraStatus = document.querySelector("#cameraStatus");
 const modelStatus = document.querySelector("#modelStatus");
@@ -17,58 +20,82 @@ const speechStatus = document.querySelector("#speechStatus");
 
 const signs = [
   {
-    phrase: "Escuchar",
-    sign: "Escuchar",
-    gesture: "LISTEN",
-    how: "Lleva la mano cerca de la oreja. Mantenela ahi un segundo, como senalando que estas escuchando."
+    phrase: "Hola",
+    sign: "Hola",
+    gesture: "HELLO",
+    how: "Mostra la palma abierta frente a la camara y movela apenas de lado a lado."
   },
   {
-    phrase: "Explicar",
-    sign: "Explicar",
-    gesture: "EXPLAIN",
-    how: "Pone la mano frente al pecho con indice y pulgar activos. Movela suave hacia adelante, como mostrando una idea."
+    phrase: "Adios",
+    sign: "Adios",
+    gesture: "GOODBYE",
+    how: "Mostra la palma abierta y movela de lado a lado como despidiendote."
   },
   {
-    phrase: "Felicitar",
-    sign: "Felicitar",
-    gesture: "CONGRATULATE",
-    how: "Mano abierta frente al pecho o cara. Hace un movimiento corto hacia arriba, como celebrando."
+    phrase: "Necesito ayuda",
+    sign: "Necesito ayuda",
+    gesture: "NEED_HELP",
+    how: "Hace un puno cerca del pecho y mantenelo quieto un segundo."
   },
   {
-    phrase: "Entender",
-    sign: "Entender",
-    gesture: "UNDERSTAND",
-    how: "Estira solo el indice y llevalo cerca de la frente. Dejalo quieto un instante."
+    phrase: "Estoy perdido",
+    sign: "Estoy perdido",
+    gesture: "LOST",
+    how: "Abri la mano lejos del centro del pecho, como preguntando donde estas."
   },
   {
-    phrase: "Invitar",
-    sign: "Invitar",
-    gesture: "INVITE",
-    how: "Mano abierta al costado del cuerpo. Movela hacia el centro, como llamando a alguien a venir."
+    phrase: "Donde queda",
+    sign: "Donde queda",
+    gesture: "WHERE_PLACE",
+    how: "Estira el indice y movelo de lado a lado frente al pecho."
   },
   {
-    phrase: "Necesitar",
-    sign: "Necesitar",
-    gesture: "NEED",
-    how: "Estira el indice y bajalo un poco frente al pecho, como marcando necesidad."
+    phrase: "Donde es",
+    sign: "Donde es",
+    gesture: "WHERE_IS",
+    how: "Estira el indice cerca del pecho y subilo un poco, como preguntando ubicacion."
   },
   {
-    phrase: "Disculpar",
-    sign: "Disculpar",
-    gesture: "APOLOGIZE",
-    how: "Puno cerrado sobre el pecho. Hace un movimiento pequeno y lento, sin sacar el puno del pecho."
+    phrase: "Ayuda",
+    sign: "Ayuda",
+    gesture: "HELP",
+    how: "Hace un puno frente al pecho y levantalo un poco."
   },
   {
-    phrase: "Permiso",
-    sign: "Permiso",
-    gesture: "PERMISSION",
-    how: "Mano abierta sobre la otra mano o frente al pecho. Deslizala suavemente hacia adelante."
+    phrase: "No entiendo",
+    sign: "No entiendo",
+    gesture: "DONT_UNDERSTAND",
+    how: "Lleva el indice o la mano cerca de la frente y separala un poco."
   },
   {
-    phrase: "Hablar",
-    sign: "Hablar",
-    gesture: "SPEAK",
-    how: "Lleva dos dedos o la mano cerca de la boca. Movela apenas hacia afuera, como saliendo la palabra."
+    phrase: "Si",
+    sign: "Si",
+    gesture: "YES",
+    how: "Pulgar arriba, mano cerrada, mantenelo quieto frente a la camara."
+  },
+  {
+    phrase: "No",
+    sign: "No",
+    gesture: "NO",
+    how: "Pulgar abajo, mano cerrada, mantenelo quieto frente a la camara."
+  },
+  {
+    phrase: "Estoy bien",
+    sign: "Estoy bien",
+    gesture: "OK",
+    how: "Hace una V con indice y medio, o pulgar arriba si queres una deteccion mas facil."
+  },
+  {
+    phrase: "Gracias",
+    sign: "Gracias",
+    gesture: "THANKS",
+    how: "Mano abierta cerca del menton o boca, movela hacia adelante."
+  },
+  {
+    phrase: "La letra C",
+    sign: "Letra C",
+    gesture: "LETTER_C",
+    how: "Curva la mano como formando una C. Pulgar e indice separados, dedos doblados."
   }
 ];
 
@@ -87,6 +114,9 @@ let running = false;
 let deferredInstallPrompt;
 let voices = [];
 let cameras = [];
+let recognition;
+let listening = false;
+let finalTranscript = "";
 
 renderPhraseButtons();
 renderGestureGuide();
@@ -115,6 +145,7 @@ installButton.addEventListener("click", async () => {
 
 startButton.addEventListener("click", start);
 stopButton.addEventListener("click", stop);
+micButton.addEventListener("click", toggleMicrophone);
 cameraSelect.addEventListener("change", () => {
   if (running) {
     stop();
@@ -331,13 +362,22 @@ function getDetectedGesture(result, poseResult) {
   if (customGesture) return customGesture;
 
   if (topGesture?.categoryName === "Pointing_Up" && topGesture.score > 0.72) {
-    return gesture("NEED", 0.78);
+    return gesture("WHERE_IS", 0.78);
   }
   if (topGesture?.categoryName === "Closed_Fist" && topGesture.score > 0.72) {
-    return gesture("APOLOGIZE", 0.78);
+    return gesture("NEED_HELP", 0.78);
   }
   if (topGesture?.categoryName === "Open_Palm" && topGesture.score > 0.72) {
-    return gesture("PERMISSION", 0.78);
+    return gesture("HELLO", 0.78);
+  }
+  if (topGesture?.categoryName === "Thumb_Up" && topGesture.score > 0.72) {
+    return gesture("YES", 0.78);
+  }
+  if (topGesture?.categoryName === "Thumb_Down" && topGesture.score > 0.72) {
+    return gesture("NO", 0.78);
+  }
+  if (topGesture?.categoryName === "Victory" && topGesture.score > 0.72) {
+    return gesture("OK", 0.78);
   }
 
   return undefined;
@@ -355,15 +395,15 @@ function getCustomGesture(landmarks, pose) {
   const nearChest = zones.chest && distance(center, zones.chest) < 0.25;
   const fromSide = Math.abs(center.x - 0.5) > 0.2;
 
-  if (nearEar) return gesture("LISTEN");
-  if (nearMouth && motion.outward) return gesture("SPEAK");
-  if (nearForehead && fingers.index && count <= 2) return gesture("UNDERSTAND");
-  if (nearChest && count === 0) return gesture("APOLOGIZE");
-  if (nearChest && fingers.index && motion.down) return gesture("NEED");
-  if (nearChest && count >= 4 && motion.up) return gesture("CONGRATULATE");
-  if (nearChest && count >= 4 && motion.outward) return gesture("PERMISSION");
-  if (nearChest && fingers.index && fingers.thumb && motion.outward) return gesture("EXPLAIN");
-  if (fromSide && count >= 4 && motion.towardCenter) return gesture("INVITE");
+  if (nearMouth && count >= 4 && motion.outward) return gesture("THANKS");
+  if (nearForehead && count <= 2) return gesture("DONT_UNDERSTAND");
+  if (nearChest && count === 0 && motion.up) return gesture("HELP");
+  if (nearChest && count === 0) return gesture("NEED_HELP");
+  if (nearChest && fingers.index && motion.down) return gesture("WHERE_PLACE");
+  if (nearChest && fingers.index && motion.up) return gesture("WHERE_IS");
+  if (fromSide && count >= 4) return gesture("LOST");
+  if (count >= 4 && motion.side) return gesture("GOODBYE");
+  if (isLetterC(landmarks, fingers)) return gesture("LETTER_C");
 
   return undefined;
 }
@@ -392,9 +432,21 @@ function getHandMotion(center) {
   return {
     up: dy < -0.035,
     down: dy > 0.035,
+    side: Math.abs(dx) > 0.035,
     outward: Math.abs(dx) > 0.035 || Math.abs(dy) > 0.035,
     towardCenter: Math.abs(last.x - 0.5) < Math.abs(first.x - 0.5) - 0.025
   };
+}
+
+function isLetterC(landmarks, fingers) {
+  const thumbTip = landmarks[4];
+  const indexTip = landmarks[8];
+  const middleTip = landmarks[12];
+  const ringTip = landmarks[16];
+  const pinkyTip = landmarks[20];
+  const thumbIndexDistance = distance(thumbTip, indexTip);
+  const curledFingers = !fingers.middle && !fingers.ring && !fingers.pinky;
+  return curledFingers && thumbIndexDistance > 0.08 && thumbIndexDistance < 0.22 && indexTip.y < pinkyTip.y;
 }
 
 function getBodyZones(pose) {
@@ -464,6 +516,58 @@ function speak(text) {
   };
 
   window.speechSynthesis.speak(utterance);
+}
+
+function toggleMicrophone() {
+  if (listening) {
+    recognition?.stop();
+    return;
+  }
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    micStatus.textContent = "Microfono no soportado";
+    transcriptText.textContent = "Este navegador no soporta transcripcion por voz. Proba con Chrome en Android.";
+    return;
+  }
+
+  recognition = new SpeechRecognition();
+  recognition.lang = "es-AR";
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    listening = true;
+    micButton.classList.add("listening");
+    micStatus.textContent = "Escuchando";
+  };
+
+  recognition.onresult = (event) => {
+    let interimTranscript = "";
+
+    for (let index = event.resultIndex; index < event.results.length; index += 1) {
+      const text = event.results[index][0].transcript.trim();
+      if (event.results[index].isFinal) {
+        finalTranscript = `${finalTranscript} ${text}`.trim();
+      } else {
+        interimTranscript = `${interimTranscript} ${text}`.trim();
+      }
+    }
+
+    transcriptText.textContent = [finalTranscript, interimTranscript].filter(Boolean).join(" ");
+  };
+
+  recognition.onerror = () => {
+    micStatus.textContent = "Error de microfono";
+  };
+
+  recognition.onend = () => {
+    listening = false;
+    micButton.classList.remove("listening");
+    micStatus.textContent = "Microfono apagado";
+  };
+
+  recognition.start();
 }
 
 function loadVoices() {
