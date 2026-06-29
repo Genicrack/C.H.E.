@@ -13,8 +13,6 @@ const guideList = document.querySelector("#guideList");
 const micButton = document.querySelector("#micButton");
 const transcriptText = document.querySelector("#transcriptText");
 const micStatus = document.querySelector("#micStatus");
-const avatar = document.querySelector("#avatar");
-const avatarStatus = document.querySelector("#avatarStatus");
 const spokenPhrase = document.querySelector("#spokenPhrase");
 const cameraStatus = document.querySelector("#cameraStatus");
 const modelStatus = document.querySelector("#modelStatus");
@@ -74,32 +72,7 @@ const signs = [
     sign: "Estoy bien",
     gesture: "OK",
     how: "Hace una V con indice y medio, o pulgar arriba si queres una deteccion mas facil."
-  },
-  {
-    phrase: "De nada",
-    sign: "De nada",
-    gesture: "YOU_WELCOME",
-    how: "Mano abierta frente al pecho, movela suave hacia afuera."
-  },
-  {
-    phrase: "Por favor",
-    sign: "Por favor",
-    gesture: "PLEASE",
-    how: "Mano abierta sobre el pecho, movela despacio en circulo."
   }
-];
-
-const avatarKeywords = [
-  { words: ["hola"], gesture: "HELLO", label: "Hola" },
-  { words: ["adios", "chau"], gesture: "GOODBYE", label: "Adios" },
-  { words: ["necesito ayuda", "ayuda"], gesture: "HELP", label: "Ayuda" },
-  { words: ["donde queda", "donde"], gesture: "WHERE_PLACE", label: "Donde queda" },
-  { words: ["no entiendo"], gesture: "DONT_UNDERSTAND", label: "No entiendo" },
-  { words: ["si"], gesture: "YES", label: "Si" },
-  { words: ["no"], gesture: "NO", label: "No" },
-  { words: ["estoy bien", "bien"], gesture: "OK", label: "Estoy bien" },
-  { words: ["de nada"], gesture: "YOU_WELCOME", label: "De nada" },
-  { words: ["por favor"], gesture: "PLEASE", label: "Por favor" }
 ];
 
 let stream;
@@ -120,8 +93,6 @@ let cameras = [];
 let recognition;
 let listening = false;
 let finalTranscript = "";
-let lastAvatarGesture = "";
-let avatarGestureTimer;
 
 renderPhraseButtons();
 renderGestureGuide();
@@ -397,6 +368,7 @@ function getCustomGesture(landmarks, pose) {
   const nearMouth = distance(center, zones.mouth) < 0.24;
   const nearForehead = distance(center, zones.forehead) < 0.24;
   const nearChest = distance(center, zones.chest) < 0.32;
+  const nearEar = distance(center, zones.ear) < 0.2;
   const fromSide = Math.abs(center.x - 0.5) > 0.23;
 
   if (isThumbUp(landmarks, fingers)) return gesture("YES", 0.9);
@@ -407,8 +379,6 @@ function getCustomGesture(landmarks, pose) {
   if (nearChest && count === 0 && motion.up) return gesture("HELP", 0.76);
   if (nearChest && count === 0) return gesture("NEED_HELP", 0.72);
   if (nearForehead && fingers.index && count <= 2) return gesture("DONT_UNDERSTAND", 0.76);
-  if (nearChest && count >= 4 && motion.outward) return gesture("YOU_WELCOME", 0.74);
-  if (nearChest && count >= 4 && motion.active) return gesture("PLEASE", 0.74);
   if (fingers.index && count <= 2 && motion.side) return gesture("WHERE_PLACE", 0.7);
 
   return undefined;
@@ -462,7 +432,8 @@ function getBodyZones(pose) {
     return {
       mouth: { x: 0.5, y: 0.28 },
       chest: { x: 0.5, y: 0.58 },
-      forehead: { x: 0.5, y: 0.18 }
+      forehead: { x: 0.5, y: 0.18 },
+      ear: { x: 0.25, y: 0.25 }
     };
   }
   const nose = pose[0];
@@ -569,7 +540,6 @@ function toggleMicrophone() {
     }
 
     transcriptText.textContent = [finalTranscript, interimTranscript].filter(Boolean).join(" ");
-    updateAvatarFromSpeech(transcriptText.textContent);
   };
 
   recognition.onerror = () => {
@@ -585,39 +555,6 @@ function toggleMicrophone() {
   recognition.start();
 }
 
-function updateAvatarFromSpeech(text) {
-  const normalizedText = normalizeText(text);
-  const match = avatarKeywords.find((item) => item.words.some((word) => hasSpokenWord(normalizedText, word)));
-  if (!match || match.gesture === lastAvatarGesture) return;
-  playAvatarGesture(match.gesture, match.label);
-}
-
-function hasSpokenWord(text, word) {
-  if (word.includes(" ")) return text.includes(word);
-  return text.split(" ").includes(word);
-}
-
-function playAvatarGesture(gestureName, label) {
-  lastAvatarGesture = gestureName;
-  avatar.className = `avatar gesture-${gestureName.toLowerCase().replaceAll("_", "-")}`;
-  avatarStatus.textContent = `Avatar: ${label}`;
-
-  clearTimeout(avatarGestureTimer);
-  avatarGestureTimer = setTimeout(() => {
-    avatar.className = "avatar";
-    lastAvatarGesture = "";
-  }, 1800);
-}
-
-function normalizeText(text) {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^\w\s]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
 
 function loadVoices() {
   voices = window.speechSynthesis?.getVoices?.() ?? [];
