@@ -13,6 +13,8 @@ const guideList = document.querySelector("#guideList");
 const micButton = document.querySelector("#micButton");
 const transcriptText = document.querySelector("#transcriptText");
 const micStatus = document.querySelector("#micStatus");
+const avatar = document.querySelector("#avatar");
+const avatarStatus = document.querySelector("#avatarStatus");
 const spokenPhrase = document.querySelector("#spokenPhrase");
 const cameraStatus = document.querySelector("#cameraStatus");
 const modelStatus = document.querySelector("#modelStatus");
@@ -38,22 +40,10 @@ const signs = [
     how: "Hace un puno cerca del pecho y mantenelo quieto un segundo."
   },
   {
-    phrase: "Estoy perdido",
-    sign: "Estoy perdido",
-    gesture: "LOST",
-    how: "Abri la mano lejos del centro del pecho, como preguntando donde estas."
-  },
-  {
     phrase: "Donde queda",
     sign: "Donde queda",
     gesture: "WHERE_PLACE",
     how: "Estira el indice y movelo de lado a lado frente al pecho."
-  },
-  {
-    phrase: "Donde es",
-    sign: "Donde es",
-    gesture: "WHERE_IS",
-    how: "Estira el indice cerca del pecho y subilo un poco, como preguntando ubicacion."
   },
   {
     phrase: "Ayuda",
@@ -86,17 +76,30 @@ const signs = [
     how: "Hace una V con indice y medio, o pulgar arriba si queres una deteccion mas facil."
   },
   {
-    phrase: "Gracias",
-    sign: "Gracias",
-    gesture: "THANKS",
-    how: "Mano abierta cerca del menton o boca, movela hacia adelante."
+    phrase: "De nada",
+    sign: "De nada",
+    gesture: "YOU_WELCOME",
+    how: "Mano abierta frente al pecho, movela suave hacia afuera."
   },
   {
-    phrase: "Gracias",
-    sign: "Gracias",
-    gesture: "THANKS",
-    how: "Mano abierta cerca del menton o boca, movela hacia adelante."
+    phrase: "Por favor",
+    sign: "Por favor",
+    gesture: "PLEASE",
+    how: "Mano abierta sobre el pecho, movela despacio en circulo."
   }
+];
+
+const avatarKeywords = [
+  { words: ["hola"], gesture: "HELLO", label: "Hola" },
+  { words: ["adios", "chau"], gesture: "GOODBYE", label: "Adios" },
+  { words: ["necesito ayuda", "ayuda"], gesture: "HELP", label: "Ayuda" },
+  { words: ["donde queda", "donde"], gesture: "WHERE_PLACE", label: "Donde queda" },
+  { words: ["no entiendo"], gesture: "DONT_UNDERSTAND", label: "No entiendo" },
+  { words: ["si"], gesture: "YES", label: "Si" },
+  { words: ["no"], gesture: "NO", label: "No" },
+  { words: ["estoy bien", "bien"], gesture: "OK", label: "Estoy bien" },
+  { words: ["de nada"], gesture: "YOU_WELCOME", label: "De nada" },
+  { words: ["por favor"], gesture: "PLEASE", label: "Por favor" }
 ];
 
 let stream;
@@ -117,6 +120,8 @@ let cameras = [];
 let recognition;
 let listening = false;
 let finalTranscript = "";
+let lastAvatarGesture = "";
+let avatarGestureTimer;
 
 renderPhraseButtons();
 renderGestureGuide();
@@ -377,7 +382,7 @@ function mapBuiltInGesture(categoryName, landmarks) {
   if (categoryName === "Thumb_Down") return gesture("NO", 0.8);
   if (categoryName === "Victory") return gesture("OK", 0.78);
   if (categoryName === "Closed_Fist") return motion.up ? gesture("HELP", 0.74) : gesture("NEED_HELP", 0.74);
-  if (categoryName === "Pointing_Up") return motion.side ? gesture("WHERE_PLACE", 0.72) : gesture("WHERE_IS", 0.72);
+  if (categoryName === "Pointing_Up") return gesture("WHERE_PLACE", 0.72);
   if (categoryName === "Open_Palm") return motion.side ? gesture("GOODBYE", 0.72) : gesture("HELLO", 0.72);
 
   return undefined;
@@ -398,13 +403,13 @@ function getCustomGesture(landmarks, pose) {
   if (isThumbDown(landmarks, fingers)) return gesture("NO", 0.9);
   if (isVictory(fingers)) return gesture("OK", 0.88);
   if (count >= 4 && motion.side) return gesture("GOODBYE", 0.76);
-  if (count >= 4 && !motion.active) return gesture(fromSide ? "LOST" : "HELLO", 0.7);
+  if (count >= 4 && !motion.active) return gesture("HELLO", 0.7);
   if (nearChest && count === 0 && motion.up) return gesture("HELP", 0.76);
   if (nearChest && count === 0) return gesture("NEED_HELP", 0.72);
   if (nearForehead && fingers.index && count <= 2) return gesture("DONT_UNDERSTAND", 0.76);
-  if (nearMouth && count >= 3 && motion.outward) return gesture("THANKS", 0.76);
+  if (nearChest && count >= 4 && motion.outward) return gesture("YOU_WELCOME", 0.74);
+  if (nearChest && count >= 4 && motion.active) return gesture("PLEASE", 0.74);
   if (fingers.index && count <= 2 && motion.side) return gesture("WHERE_PLACE", 0.7);
-  if (fingers.index && count <= 2) return gesture("WHERE_IS", 0.68);
 
   return undefined;
 }
@@ -564,6 +569,7 @@ function toggleMicrophone() {
     }
 
     transcriptText.textContent = [finalTranscript, interimTranscript].filter(Boolean).join(" ");
+    updateAvatarFromSpeech(transcriptText.textContent);
   };
 
   recognition.onerror = () => {
@@ -577,6 +583,40 @@ function toggleMicrophone() {
   };
 
   recognition.start();
+}
+
+function updateAvatarFromSpeech(text) {
+  const normalizedText = normalizeText(text);
+  const match = avatarKeywords.find((item) => item.words.some((word) => hasSpokenWord(normalizedText, word)));
+  if (!match || match.gesture === lastAvatarGesture) return;
+  playAvatarGesture(match.gesture, match.label);
+}
+
+function hasSpokenWord(text, word) {
+  if (word.includes(" ")) return text.includes(word);
+  return text.split(" ").includes(word);
+}
+
+function playAvatarGesture(gestureName, label) {
+  lastAvatarGesture = gestureName;
+  avatar.className = `avatar gesture-${gestureName.toLowerCase().replaceAll("_", "-")}`;
+  avatarStatus.textContent = `Avatar: ${label}`;
+
+  clearTimeout(avatarGestureTimer);
+  avatarGestureTimer = setTimeout(() => {
+    avatar.className = "avatar";
+    lastAvatarGesture = "";
+  }, 1800);
+}
+
+function normalizeText(text) {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function loadVoices() {

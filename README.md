@@ -7,8 +7,9 @@ Aplicacion web movil para probar camara, deteccion de gestos y voz en vivo.
 - Abre la camara frontal del celular.
 - Usa MediaPipe para detectar manos y cuerpo desde la camara.
 - Convierte esos gestos en frases en espanol con `speechSynthesis`.
-- Incluye frases basicas: Hola, Adios, Necesito ayuda, Estoy perdido, Donde queda, Donde es, Ayuda, No entiendo, Si, No, Estoy bien y Gracias.
+- Incluye frases basicas: Hola, Adios, Necesito ayuda, Donde queda, Ayuda, No entiendo, Si, No, Estoy bien, De nada y Por favor.
 - Usa el microfono para transcribir en pantalla lo que dice otra persona.
+- Muestra un avatar simple que acompania palabras reconocidas por el microfono.
 - Permite tocar frases rapidas para probar el altavoz.
 - Se puede instalar como PWA si se publica por HTTPS.
 
@@ -21,15 +22,14 @@ Las 9 intentan detectarse desde la camara usando puntos de mano, cuerpo y movimi
 | 1 | Hola | Palma abierta moviendo de lado a lado | Si |
 | 2 | Adios | Palma abierta moviendo de lado a lado | Si |
 | 3 | Necesito ayuda | Puno cerca del pecho | Si |
-| 4 | Estoy perdido | Mano abierta lejos del centro | Si |
-| 5 | Donde queda | Indice de lado a lado | Si |
-| 6 | Donde es | Indice subiendo cerca del pecho | Si |
-| 7 | Ayuda | Puno subiendo cerca del pecho | Si |
-| 8 | No entiendo | Mano o indice cerca de la frente | Si |
-| 9 | Si | Pulgar arriba | Si |
-| 10 | No | Pulgar abajo | Si |
-| 11 | Estoy bien | V o pulgar arriba | Si |
-| 12 | Gracias | Mano desde boca/menton hacia afuera | Si |
+| 4 | Donde queda | Indice de lado a lado | Si |
+| 5 | Ayuda | Puno subiendo cerca del pecho | Si |
+| 6 | No entiendo | Mano o indice cerca de la frente | Si |
+| 7 | Si | Pulgar arriba | Si |
+| 8 | No | Pulgar abajo | Si |
+| 9 | Estoy bien | V o pulgar arriba | Si |
+| 10 | De nada | Mano abierta hacia afuera | Si |
+| 11 | Por favor | Mano abierta en el pecho | Si |
 
 ## Como subirlo a GitHub y conectarlo a Vercel
 

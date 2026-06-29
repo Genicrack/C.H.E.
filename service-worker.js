@@ -1,4 +1,4 @@
-const CACHE_NAME = "vozsenias-v12";
+const CACHE_NAME = "vozsenias-v13";
 const LOCAL_ASSETS = [
   "./",
   "./index.html",
